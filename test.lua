@@ -1,6 +1,4 @@
-require "utils"
-
-local ini = require "lua-ini"
+local ini = require "ini"
 
 local config, err = ini.loadfile("test.ini")
 if not config then
