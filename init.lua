@@ -6,10 +6,9 @@ local ini = { __VERSION__ = 0.1 }
 
 ---comment 从string内解析ini结构
 ---@param buffer string            @合法的ini字符串
----@param need_comment boolean     @是否保留comment
+---@param need_comment boolean     @是否保留注释内容
 ---@return table                   @合法的lua table
 function ini.loadstring(buffer, need_comment)
-  local line_number = 1
   local config = { comments = { } }
   local section
   for line in buffer:gmatch("([^\r\n]+)") do
@@ -20,21 +19,25 @@ function ini.loadstring(buffer, need_comment)
     if head ~= 59 then
       -- 如果是section类型
       if head == 91 then
-        section = assert(l:match("%[(.+)%]"), "[INI ERROR] : No empty sections are allowed in the [" .. line_number .. "] line.")
+        section = l:match("%[(.+)%]")
+        if not section then
+          return false, "[INI ERROR] : No empty sections are allowed in the [] line."
+        end
         local v = config[section]
-        assert(not v or type(v) == 'table', "[INI ERROR] : There are conflicting key-values or sections in section [" .. section .. "].")
+        if v and type(v) ~= 'table' then
+          return false, "[INI ERROR] : There are conflicting key-values or sections in section [" .. section .. "]."
+        end
         if not v then -- 如果之前没有section则创建一个.
           config[section] = {}
         end
       else
         local tab = config[section]
         if not tab then
-          local key, value = l:match("([^=;]+)=([^ ;]+)")
-          assert(key and value, "[INI ERROR] : An invalid key-value pair was found in the [" .. line_number .. "] line.")
-          config[key] = value
-        else
-          local key, value = l:match("([^=;]+)=([^ ;]+)")
-          config[section][key] = value
+          tab = config
+        end
+        local key, value = l:match("([^=;]+)=([^ ;]+)")
+        if key and value then
+          tab[key] = value
         end
       end
     else
@@ -43,7 +46,6 @@ function ini.loadstring(buffer, need_comment)
       end
     end
     -- print("[" .. line .. "]")
-    line_number = line_number + 1
   end
   if not need_comment then
     config.comments = nil
@@ -52,8 +54,8 @@ function ini.loadstring(buffer, need_comment)
 end
 
 ---comment 从文件内解析ini结构
----@param filename     string      @已存在并合法的ini文件名
----@param need_comment boolean     @是否保留comment
+---@param filename     string      @已存在并合法的`ini`文件名
+---@param need_comment boolean     @是否保留注释内容
 ---@return table                   @合法的lua table
 function ini.loadfile(filename, need_comment)
   local f, err = io.open(filename, "rb")
