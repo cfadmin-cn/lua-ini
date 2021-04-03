@@ -2,6 +2,11 @@ local type = type
 local assert = assert
 local insert = table.insert
 
+local comments = {
+  ['#'] = true, [35] = true,
+  [';'] = true, [59] = true,
+}
+
 local ini = { __VERSION__ = 0.1 }
 
 ---comment 从string内解析ini结构
@@ -16,7 +21,7 @@ function ini.loadstring(buffer, need_comment)
     local l = line:gsub(" ", "")
     -- 如果不是被注释的一行
     local head = l:byte(1)
-    if head ~= 59 then
+    if not comments[head] then
       -- 如果是section类型
       if head == 91 then
         section = l:match("%[(.+)%]")
@@ -35,7 +40,7 @@ function ini.loadstring(buffer, need_comment)
         if not tab then
           tab = config
         end
-        local key, value = l:match("([^=;]+)=([^ ;]+)")
+        local key, value = l:match("([^=#;]+)=([^ ;#]+)")
         if key and value then
           tab[key] = value
         end
