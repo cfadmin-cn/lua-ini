@@ -1,23 +1,22 @@
 ## lua-ini
-  
-  ini parsing library implemented by pure lua.
+
+  The `ini` library written in `C` exports interfaces for `Lua` to use.
+
+## Build
+
+  `cd lua-ini` and `make build`
 
 ## Usage
 
-  * First use `local ini = require "ini"` to import dependent libraries.
+  * use `ini.load(config_string)` to load `ini` string and return `table`.
 
-  * Then, the built-in `ini.loadstring` or `ini.loadfile` method can choose to parse the `ini` structure from the file or string into a lua table.
-
-## Function signature
-
-  * `function ini.loadstring(buffer, need_comment) table | nil, err end`
-
-  * `function ini.loadfile(filename, need_comment) table | nil, err end`
-
+  * use `ini.loadfile(config_filename)` to load `ini` file and return `table`.
+  
 ## Example
 
   Please refer to the `test.lua` file.
 
-## LICENSE
+## License
 
-  [MIT](https://github.com/CandyMi/lua-ini/blob/master/LICENSE)
+  [MIT](https://github.com/cfadmin-cn/lua-toml)
+  
